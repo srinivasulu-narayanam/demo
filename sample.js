@@ -1,58 +1,56 @@
-// import fetch from "node-fetch";
-
-// function MakeApiCall()
-// {
-//   fetch('https://demo7303877.mockable.io/')
-//   .then((response) => response.json())
-//   .then((data) => console.log(data));
-
-// }
-
-// let a = MakeApiCall();
 import fetch from "node-fetch";
-const api_url = "https://demo7303877.mockable.io/"
 
-// 1)Method for Getting the minimum and maximum price from the data
-const minMaxPrice = (products) => {
-  let minPrice = Number.MAX_VALUE;
-  let maxPrice = Number.MIN_VALUE;
-  for (let i = 0;i<products.length;i++){
-    if (minPrice>products[i].price)
-      minPrice = products[i].price;
-    else if (maxPrice<products[i].price)
-      maxPrice = products[i].price;
-  }
-  return {MinimumPrice:minPrice,MaximumPrice:maxPrice};
+function maxAndminprz(productList){
+    let min = productList[0].price;
+    let max = 0;
+
+    productList.map((product)=>{
+        if(product.price > max) max = product.price;
+        else if(product.price < min) min = product.price;
+    });
+
+    let minProduct = productList.filter((e) => e.price === min);
+    let maxProduct = productList.filter((e) => e.price === max);
+
+    minProduct.map((product) => console.log("min price\nName: "+product.product+" Price:"+product.price));
+    maxProduct.map((product) => console.log("max price\nName: "+product.product+" Price:"+product.price));
+
 }
 
-// 2)Method for filtering from the data
-const filteringBrandandRange = (products,brand,maxRange = Number.MAX_VALUE,minRange = Number.MIN_VALUE) => {
-  let filterBrand = products?.filter((item) =>{
-    return item.brand === brand && minRange<=item.price && maxRange>item.price;
+function productByBrandAndPrice(productList, brand, price = 0){
+    let filterBrandProductList = productList.filter((e) => e.brand === brand );
     
-  })
-  return filterBrand;
+    if(price > 0){
+        let filterPriceProductList = filterBrandProductList.filter(
+            (e) => (e.price > 0 && e.price <= price)
+        );
+        
+        filterPriceProductList.map((product) => console.log("Name: "+product.product+" \nbrand: "+product.brand+"\nprice: "+product.price));
+    } else 
+        filterBrandProductList.map((product) => console.log("Name: "+product.product+" \nbrand: "+product.brand+"\nprice: "+product.price));
+}
+
+function searchWithSubStr(productList,searchStr){
+    let filterProductList = productList.filter((e) => (e.productName).includes(searchStr));
+    filterProductList.map((product) => console.log(product.productName))
 }
 
 
-// 3)Method for getting the product from list of product
-const productListMethod = (productList,products)=> {
-  let result = [];
-  for (let i = 0;i<productList.length;i++){
-    for (let j = 0;j<products.length;j++){
-      if (productList[i] === products[j].productName)
-        result.push(products[j].productName)
-    }
-  }
-  return result;
+function makeApiCall(){
+    fetch("https://demo7303877.mockable.io/",{method:"GET"})
+    .then((res)=>{
+        let promise = res.json();
+        promise.then((result)=>{
+            let productList = result.products;
+            console.log("\nA");
+            maxAndminprz(productList);
+            console.log("\nB");
+            productByBrandAndPrice(productList,"Daniel Klein");
+            console.log("\nC");
+            searchWithSubStr(productList,"Watch");
+        })
+
+    })
 }
 
-// Defining async function
-const getApi = async function(url){
-  
-  const response = await fetch(url);
-  
-  var data = await response.json();
-  console.log(productListMethod(["Fastrack Unisex Black & Green Reflex 2.0 Smart Band","Red Tape Men Black Leather Loafers","Roadster Men Black Solid Tailored Jacket","Just for Fun"],data.products));
-}
-getApi(api_url);
+makeApiCall();
